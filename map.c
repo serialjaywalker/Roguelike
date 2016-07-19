@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include "map.h"
 #include "entities.h"
 
@@ -7,6 +8,11 @@
 
 void mapgen(map *curr, unsigned int x, unsigned int y){
 	unsigned int i=0;
+	if( (x == 0) || (y == 0) ){
+		fprintf(stderr, "Error: called generation of size 0\n");
+		exit(EXIT_FAILURE);
+	}
+	
 	//allocate dynamic array
 	curr->content = malloc(y * sizeof(char *));
 	for(i=0; i<y; i++){
@@ -34,7 +40,7 @@ void mapfree(map *curr){
 
 
 void roomgen(map *curr){
-	
+	srand(time(NULL)); //replace with time(NULL) later
 	unsigned int i=0, j=0;
 	
 	//make sure each tile is a floor
@@ -54,4 +60,11 @@ void roomgen(map *curr){
 	}
 	
 	//step 3: do smart things to put rooms 
+	//step 4: place player randomly, but only on floor cells
+	do {
+		curr->playerpos[0] = (rand() % (curr->ysize-2))+1; //set player y
+		curr->playerpos[1] = (rand() % (curr->xsize-2))+1; //set player x
+	} while(curr->content[curr->playerpos[0]][curr->playerpos[1]] != floor);
+	curr->content[curr->playerpos[0]][curr->playerpos[1]] = player_cell;
+	
 }

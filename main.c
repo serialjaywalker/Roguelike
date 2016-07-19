@@ -26,46 +26,44 @@
 #include "map.h"
 #include "entities.h"
 #include "display.h"
+#include "ncurses.h"
 
-
-int ack(int m, int n)
-{
-    if (m == 0){
-        return n+1;
-    }
-    else if((m > 0) && (n == 0)){
-        return ack(m-1, 1);
-    }
-    else if((m > 0) && (n > 0)){
-        return ack(m-1, ack(m, n-1));
-    }
-}
-void dispack(){
-	int i, j;
-	for(i=3;1;i++){
-		for(j=1;j < i*10;j++){
-			printf("ack of m=%d n=%d gives %d\n",i,j,ack(i,j));
-		}
-	}
-}
 
 int main()
 {
+	
+	initscr();
+	raw();
+	cbreak();
+	noecho();
+	
 	//test harness for modules/tasks
-	printf("declaring map\n");
+	printw("declaring map\n"); refresh();
 	map firstmap;
-	printf("generating map\n");
-	mapgen(&firstmap, 10, 10);
-	printf("generating rooms\n");
+	printw("generating map\n"); refresh();
+	mapgen(&firstmap, 20, 10);
+	printw("generating rooms\n"); refresh();
 	roomgen(&firstmap);
-	printf("displaying map\n");
-	showmap(&firstmap);
-	printf("freeing map\n");
+	printw("Press key to display map\n"); refresh();
+	getch();
+	clear();
+	show_map(&firstmap);
+	printw("\nplayer pos: x=%d y=%d\n", firstmap.playerpos[1],firstmap.playerpos[0]);
+	refresh();
+	
+	while(1){
+		pollbutts();
+		movechar(&firstmap);
+		show_map(&firstmap);
+		printw("\nplayer pos: x=%d y=%d\n", firstmap.playerpos[1],firstmap.playerpos[0]);
+		
+	}
+	//printf("Ackermann's for funsies when m>=3\n");
+	//dispack();
+	
+	printw("freeing map\n");
 	mapfree(&firstmap);
-	
-	printf("Ackermann's for funsies when m>=3\n");
-	dispack();
-	
+	endwin();
 	return 0;
 }
 
